@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Social Media Analytics Dashboard</h1>
+
+<div class="dashboard">
+
+<!-- Overall Sentiment -->
+<div class="card">
+    <h2>Overall Sentiment</h2>
+    <p class="positive">Positive: {{ sentiments["Positive"] }}</p>
+    <p class="negative">Negative: {{ sentiments["Negative"] }}</p>
+    <p class="neutral">Neutral: {{ sentiments["Neutral"] }}</p>
+    <p>Accuracy: {{ accuracy }}</p>
+</div>
+
+<!-- Trending -->
+<div class="card">
+    <h2>Trending Topics</h2>
+    <ul>
+        {% for topic, count in trends %}
+            <li>{{ topic }} → {{ count }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Topic-wise -->
+<div class="card full-width">
+    <h2>Topic-wise Sentiment</h2>
+
+    <!-- Search -->
+    <input type="text" id="searchBox" placeholder="Search topic..." onkeyup="filterTopics()"
+        style="margin-bottom:15px; padding:8px; width:100%; border-radius:8px; border:1px solid #ccc;">
+
+    <!-- GRID VIEW -->
+    <div class="topic-grid" id="topicGrid">
+        {% for topic, data in topic_sentiments.items() %}
+            <div class="topic-card">
+                <h3 class="topic-name">{{ topic }}</h3>
+                <p class="positive">P: {{ data["Positive"] }}</p>
+                <p class="negative">N: {{ data["Negative"] }}</p>
+                <p class="neutral">Neu: {{ data["Neutral"] }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- SEARCH RESULT VIEW -->
+    <div id="searchResult" style="display:none;"></div>
+</div>
+
+<!-- Chart -->
+<div class="card full-width">
+    <h2>Sentiment Chart</h2>
+    <canvas id="chart"></canvas>
+</div>
+
+</div>
+</div>
+
+<script>
+// DATA FROM FLASK
+const topicData = {{ topic_sentiments | tojson }};
+
+// 🔍 SEARCH FUNCTION
+function filterTopics() {
+    const input = document.getElementById("searchBox").value.toLowerCase();
+
+    const grid = document.getElementById("topicGrid");
+    const resultDiv = document.getElementById("searchResult");
+
+    if (input === "") {
+        grid.style.display = "grid";
+        resultDiv.style.display = "none";
+        resultDiv.innerHTML = "";
+        return;
+    }
+
+    let found = false;
+    let html = "";
+
+    for (let topic in topicData) {
+        if (topic.toLowerCase().includes(input)) {
+            const data = topicData[topic];
+
+            html += `
+                <div class="topic-card">
+                    <h3>${topic}</h3>
+                    <p class="positive">Positive: ${data["Positive"]}</p>
+                    <p class="negative">Negative: ${data["Negative"]}</p>
+                    <p class="neutral">Neutral: ${data["Neutral"]}</p>
+                </div>
+            `;
+
+            found = true;
+        }
+    }
+
+    if (found) {
+        grid.style.display = "none";
+        resultDiv.style.display = "grid";
+        resultDiv.style.gridTemplateColumns = "repeat(2, 1fr)";
+        resultDiv.style.gap = "15px";
+        resultDiv.innerHTML = html;
+    } else {
+        grid.style.display = "none";
+        resultDiv.style.display = "block";
+        resultDiv.innerHTML = "<p>No topic found</p>";
+    }
+}
+
+// 📊 CHART (FIXED)
+const labels = Object.keys(topicData);
+
+const positive = labels.map(t => topicData[t]["Positive"]);
+const negative = labels.map(t => topicData[t]["Negative"]);
+const neutral = labels.map(t => topicData[t]["Neutral"]);
+
+const ctx = document.getElementById("chart").getContext("2d");
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Positive',
+                data: positive,
+                backgroundColor: '#2ecc71'
+            },
+            {
+                label: 'Negative',
+                data: negative,
+                backgroundColor: '#e74c3c'
+            },
+            {
+                label: 'Neutral',
+                data: neutral,
+                backgroundColor: '#f39c12'
+            }
+        ]
+    }
+});
+</script>
+
+</body>
+</html>
