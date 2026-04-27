@@ -3,9 +3,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
 
-# -------------------------------
-# 🔥 CONTENT-BASED FILTERING
-# -------------------------------
 def content_based_recommendation(df, index=0, top_n=5):
     tfidf = TfidfVectorizer(stop_words="english")
 
@@ -21,10 +18,6 @@ def content_based_recommendation(df, index=0, top_n=5):
 
     return top_posts
 
-
-# -------------------------------
-# 🔥 COLLABORATIVE FILTERING
-# -------------------------------
 def collaborative_filtering(df, top_n=5):
     df["user_id"] = df.index % 10  # simulate users
 
@@ -39,9 +32,6 @@ def collaborative_filtering(df, top_n=5):
     return recommended_posts
 
 
-# -------------------------------
-# 🔥 MAIN FUNCTION
-# -------------------------------
 def get_recommendations(df):
     content_rec = content_based_recommendation(df)
     collab_rec = collaborative_filtering(df)
@@ -52,9 +42,6 @@ def get_recommendations(df):
     }
 
 
-# -------------------------------
-# 🔥 RUN
-# -------------------------------
 if __name__ == "__main__":
     print("Running Recommendation System...")
 
@@ -63,10 +50,10 @@ if __name__ == "__main__":
     # Fix columns
     df.columns = ["id", "topic", "sentiment", "text"]
 
-    # 🔥 FIX 1: Remove missing values
+   
     df = df.dropna(subset=["text"])
 
-    # 🔥 FIX 2: Reduce dataset size (VERY IMPORTANT)
+    
     df = df.sample(2000)
 
     df["text"] = df["text"].astype(str)
