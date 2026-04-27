@@ -2,9 +2,6 @@ import requests
 import time
 import json
 
-# -------------------------------
-# 🔥 FETCH DATA FROM API
-# -------------------------------
 def fetch_data(keyword):
     url = f"https://api.datamuse.com/words?ml={keyword}"
 
@@ -21,10 +18,6 @@ def fetch_data(keyword):
         print("Error fetching data:", e)
         return []
 
-
-# -------------------------------
-# 🔥 REAL-TIME MONITOR
-# -------------------------------
 def monitor_keyword(keyword, iterations=3, delay=5):
     results = []
 
@@ -45,10 +38,6 @@ def monitor_keyword(keyword, iterations=3, delay=5):
 
     return results
 
-
-# -------------------------------
-# 🔥 MAIN RUN
-# -------------------------------
 if __name__ == "__main__":
     print("Running Real-Time Monitoring...")
 
