@@ -1,9 +1,6 @@
 import pandas as pd
 import json
 
-# -------------------------------
-# 🔥 CALCULATE METRICS
-# -------------------------------
 def calculate_metrics(df):
     # Growth rate
     df["growth_rate"] = ((df["followers_end"] - df["followers_start"]) / df["followers_start"]) * 100
@@ -13,10 +10,6 @@ def calculate_metrics(df):
 
     return df
 
-
-# -------------------------------
-# 🔥 STRATEGY ANALYSIS
-# -------------------------------
 def analyze_strategy(df):
     # find most frequent content type per competitor
     strategy = df.groupby("competitor")["content_type"] \
@@ -27,10 +20,6 @@ def analyze_strategy(df):
 
     return strategy
 
-
-# -------------------------------
-# 🔥 MAIN RUN
-# -------------------------------
 if __name__ == "__main__":
     print("Running Competitor Analysis...")
 
