@@ -1,20 +1,12 @@
 import pandas as pd
 import json
 
-# -------------------------------
-# 🔥 METRICS CALCULATION
-# -------------------------------
 def calculate_metrics(df):
     df["CTR"] = (df["clicks"] / df["impressions"]) * 100
     df["conversion_rate"] = (df["conversions"] / df["clicks"]) * 100
     df["ROI"] = ((df["revenue"] - df["cost"]) / df["cost"]) * 100
 
     return df
-
-
-# -------------------------------
-# 🔥 MAIN RUN
-# -------------------------------
 if __name__ == "__main__":
     print("Running Ad Campaign Optimization...")
 
