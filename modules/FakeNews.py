@@ -4,18 +4,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 import json
 
-# -------------------------------
-# 🔥 DATA PREPARATION
-# -------------------------------
 def prepare_data(df):
     # Fake = Negative, Real = Positive/Neutral
     df["label"] = df["sentiment"].apply(lambda x: 1 if x == "Negative" else 0)
     return df
 
-
-# -------------------------------
-# 🔥 TRAIN MODEL
-# -------------------------------
 def train_model(df):
     X = df["text"]
     y = df["label"]
@@ -33,19 +26,12 @@ def train_model(df):
     return model, vectorizer, accuracy
 
 
-# -------------------------------
-# 🔥 PREDICTION FUNCTION
-# -------------------------------
 def predict_fake_news(model, vectorizer, texts):
     X_new = vectorizer.transform(texts)
     preds = model.predict(X_new)
 
     return ["Fake" if p == 1 else "Real" for p in preds]
 
-
-# -------------------------------
-# 🔥 MAIN RUN
-# -------------------------------
 if __name__ == "__main__":
     print("Running Fake News Detection...")
 
@@ -54,7 +40,7 @@ if __name__ == "__main__":
     # Fix columns
     df.columns = ["id", "topic", "sentiment", "text"]
 
-    # 🔥 IMPORTANT FIXES
+   
     df = df.dropna(subset=["text"])   # remove NaN
     df = df.sample(2000)             # reduce size (memory safe)
     df["text"] = df["text"].astype(str)
