@@ -1,9 +1,6 @@
 import networkx as nx
 import json
 
-# -------------------------------
-# 🔥 BUILD GRAPH
-# -------------------------------
 def build_graph(posts):
     G = nx.DiGraph()
 
@@ -16,10 +13,6 @@ def build_graph(posts):
 
     return G
 
-
-# -------------------------------
-# 🔥 INFLUENCER DETECTION
-# -------------------------------
 def detect_influencers(G, top_n=5):
     # Eigenvector Centrality
     centrality = nx.eigenvector_centrality(G, max_iter=1000)
@@ -28,10 +21,6 @@ def detect_influencers(G, top_n=5):
 
     return sorted_users[:top_n]
 
-
-# -------------------------------
-# 🔥 MAIN RUN
-# -------------------------------
 if __name__ == "__main__":
     print("Running Influencer Detection...")
 
