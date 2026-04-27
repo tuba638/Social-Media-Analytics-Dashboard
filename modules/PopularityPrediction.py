@@ -3,10 +3,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder
 import json
-
-# -------------------------------
-# 🔥 FEATURE ENGINEERING
-# -------------------------------
 def create_features(df):
     df["text_length"] = df["text"].astype(str).apply(len)
 
@@ -35,20 +31,12 @@ def train_model(df):
 
     return model, score
 
-
-# -------------------------------
-# 🔥 PREDICT
-# -------------------------------
 def predict(model, df):
     X = df[["text_length", "sentiment_encoded", "topic_encoded"]]
     preds = model.predict(X)
 
     return preds.tolist()
 
-
-# -------------------------------
-# 🔥 MAIN RUN
-# -------------------------------
 if __name__ == "__main__":
     print("Running Popularity Prediction...")
 
@@ -56,7 +44,7 @@ if __name__ == "__main__":
 
     df.columns = ["id", "topic", "sentiment", "text"]
 
-    # 🔥 CLEANING
+    
     df = df.dropna(subset=["text"])
     df = df.sample(2000)
     df["text"] = df["text"].astype(str)
