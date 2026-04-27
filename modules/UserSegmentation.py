@@ -3,9 +3,6 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import json
 
-# -------------------------------
-# 🔥 FEATURE ENGINEERING
-# -------------------------------
 def create_features(df):
     # Behavior feature: text length
     df["text_length"] = df["text"].astype(str).apply(len)
@@ -19,10 +16,6 @@ def create_features(df):
 
     return df
 
-
-# -------------------------------
-# 🔥 CLUSTERING
-# -------------------------------
 def perform_clustering(df, k=3):
     features = df[["text_length", "sentiment_encoded", "topic_encoded"]]
 
@@ -35,9 +28,7 @@ def perform_clustering(df, k=3):
     return df
 
 
-# -------------------------------
-# 🔥 MAIN RUN
-# -------------------------------
+
 if __name__ == "__main__":
     print("Running User Segmentation...")
 
@@ -46,7 +37,7 @@ if __name__ == "__main__":
     # Fix columns
     df.columns = ["id", "topic", "sentiment", "text"]
 
-    # 🔥 CLEANING
+  
     df = df.dropna(subset=["text"])
     df = df.sample(2000)
     df["text"] = df["text"].astype(str)
