@@ -1,158 +1,291 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
-
-    <!-- CSS -->
+    <title>Social Media Analytics Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
 <div class="container">
+    <h1>Social Media Analytics Dashboard</h1>
 
-<h1>Social Media Analytics Dashboard</h1>
+    <div class="dashboard">
 
-<div class="dashboard">
+        <!-- Overall Sentiment -->
+        <div class="card">
+            <h2>Overall Sentiment</h2>
+            <p class="positive">Positive: {{ sentiments["Positive"] }}</p>
+            <p class="negative">Negative: {{ sentiments["Negative"] }}</p>
+            <p class="neutral">Neutral: {{ sentiments["Neutral"] }}</p>
+            <p><strong>Accuracy: {{ accuracy }}</strong></p>
+        </div>
 
-<!-- Overall Sentiment -->
-<div class="card">
-    <h2>Overall Sentiment</h2>
-    <p class="positive">Positive: {{ sentiments["Positive"] }}</p>
-    <p class="negative">Negative: {{ sentiments["Negative"] }}</p>
-    <p class="neutral">Neutral: {{ sentiments["Neutral"] }}</p>
-    <p>Accuracy: {{ accuracy }}</p>
-</div>
+        <!-- Trending Topics -->
+        <div class="card">
+            <h2>Trending Topics</h2>
+            <ul>
+                {% for topic, count in trends %}
+                    <li>{{ topic }} → {{ count }}</li>
+                {% endfor %}
+            </ul>
+        </div>
 
-<!-- Trending -->
-<div class="card">
-    <h2>Trending Topics</h2>
-    <ul>
-        {% for topic, count in trends %}
-            <li>{{ topic }} → {{ count }}</li>
-        {% endfor %}
-    </ul>
-</div>
+        <!-- Topic-wise Sentiment -->
+        <div class="card full-width">
+            <h2>Topic-wise Sentiment</h2>
 
-<!-- Topic-wise -->
-<div class="card full-width">
-    <h2>Topic-wise Sentiment</h2>
+            <input type="text" id="searchBox" placeholder="Search topic..." onkeyup="filterTopics()"
+                style="margin-bottom:15px; padding:8px; width:100%; border-radius:8px; border:1px solid #ccc;">
 
-    <!-- Search -->
-    <input type="text" id="searchBox" placeholder="Search topic..." onkeyup="filterTopics()"
-        style="margin-bottom:15px; padding:8px; width:100%; border-radius:8px; border:1px solid #ccc;">
-
-    <!-- GRID VIEW -->
-    <div class="topic-grid" id="topicGrid">
-        {% for topic, data in topic_sentiments.items() %}
-            <div class="topic-card">
-                <h3 class="topic-name">{{ topic }}</h3>
-                <p class="positive">P: {{ data["Positive"] }}</p>
-                <p class="negative">N: {{ data["Negative"] }}</p>
-                <p class="neutral">Neu: {{ data["Neutral"] }}</p>
+            <div class="topic-grid" id="topicGrid">
+                {% for topic, data in topic_sentiments.items() %}
+                    <div class="topic-card">
+                        <h3 class="topic-name">{{ topic }}</h3>
+                        <p class="positive">P: {{ data["Positive"] }}</p>
+                        <p class="negative">N: {{ data["Negative"] }}</p>
+                        <p class="neutral">Neu: {{ data["Neutral"] }}</p>
+                    </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-    </div>
 
-    <!-- SEARCH RESULT VIEW -->
-    <div id="searchResult" style="display:none;"></div>
-</div>
+            <div id="searchResult" style="display:none;"></div>
+        </div>
 
-<!-- Chart -->
-<div class="card full-width">
-    <h2>Sentiment Chart</h2>
-    <canvas id="chart"></canvas>
-</div>
+        <!-- Sentiment Chart -->
+        <div class="card full-width">
+            <h2>Sentiment Chart</h2>
+            <canvas id="chart"></canvas>
+        </div>
 
-</div>
-</div>
+        <!-- Fake News Detection -->
+        <div class="card">
+            <h2>Fake News Detection</h2>
+            <p><strong>Model Accuracy: {{ fake_acc }}</strong></p>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card">
+            <h2>Recommendations</h2>
+
+            {% if recommendations %}
+                {% if recommendations is string %}
+                    <p>{{ recommendations }}</p>
+
+                {% elif recommendations.content_based %}
+                    <p><strong>Content-Based:</strong></p>
+                    <ul>
+                        {% for rec in recommendations.content_based[:3] %}
+                            <li>{{ rec[:60] }}...</li>
+                        {% endfor %}
+                    </ul>
+
+                    {% if recommendations.collaborative %}
+                        <p><strong>Collaborative:</strong></p>
+                        <ul>
+                            {% for rec in recommendations.collaborative[:3] %}
+                                <li>{{ rec[:60] }}...</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                {% else %}
+                    <p>{{ recommendations }}</p>
+                {% endif %}
+            {% else %}
+                <p>No recommendations available</p>
+            {% endif %}
+        </div>
+
+        <!-- User Segmentation -->
+        <div class="card">
+            <h2>User Segmentation</h2>
+
+            {% if segments %}
+                {% for seg in segments %}
+                    <p>
+                        Cluster {{ seg.cluster if seg.cluster is defined else 'N/A' }}:
+                        {{ seg.text[:50] if seg.text is defined else 'N/A' }}...
+                    </p>
+                {% endfor %}
+            {% else %}
+                <p>No segmentation data</p>
+            {% endif %}
+        </div>
+
+        <!-- Ad Campaign -->
+        <div class="card">
+            <h2>Ad Campaign Metrics</h2>
+
+            {% if ad_data %}
+                {% for ad in ad_data %}
+                    <p>
+                        <strong>{{ ad.campaign }}</strong> -
+                        CTR: {{ "%.2f"|format(ad.CTR) if ad.CTR else 'N/A' }}% |
+                        ROI: {{ "%.2f"|format(ad.ROI) if ad.ROI else 'N/A' }}%
+                    </p>
+                {% endfor %}
+            {% else %}
+                <p>No ad data</p>
+            {% endif %}
+        </div>
+
+        <!-- Competitor Analysis -->
+        <div class="card">
+            <h2>Competitor Analysis</h2>
+
+            {% if strategy %}
+                {% for s in strategy %}
+                    <p><strong>{{ s.competitor if s.competitor is defined else 'Unknown' }}</strong></p>
+                {% endfor %}
+            {% else %}
+                <p>No competitor data</p>
+            {% endif %}
+        </div>
+
+        <!-- Popularity Prediction -->
+        <div class="card">
+            <h2>Popularity Prediction</h2>
+
+            <p><strong>Model Score: {{ "%.4f"|format(model_score) if model_score else 'N/A' }}</strong></p>
+
+            {% if predictions %}
+                <p>Predictions computed: {{ predictions|length }} samples</p>
+            {% endif %}
+        </div>
+
+        <!-- Real-time Monitoring -->
+        <div class="card">
+            <h2>Real-time Monitoring</h2>
+
+            {% if realtime_data %}
+                {% for item in realtime_data %}
+                    <p>{{ item }}</p>
+                {% endfor %}
+            {% else %}
+                <p>No real-time data</p>
+            {% endif %}
+        </div>
+
+        <!-- Network Communities -->
+        <div class="card">
+            <h2>Network Communities</h2>
+
+            {% if communities %}
+                <p>Communities detected: {{ communities|length }}</p>
+            {% else %}
+                <p>No community data</p>
+            {% endif %}
+        </div>
+
+        <!-- Network Influencers -->
+        <div class="card">
+            <h2>Network Influencers</h2>
+
+            {% if influencers_net %}
+                {% for inf in influencers_net[:5] %}
+                    <p><strong>{{ inf[0] }}</strong> - Score: {{ "%.4f"|format(inf[1]) }}</p>
+                {% endfor %}
+            {% else %}
+                <p>No influencer data</p>
+            {% endif %}
+        </div>
+
+        <!-- Eigenvector Influencers -->
+        <div class="card">
+            <h2>Eigenvector Centrality Influencers</h2>
+
+            {% if influencers_eigen %}
+                {% for inf in influencers_eigen[:5] %}
+                    <p><strong>{{ inf[0] }}</strong> - Centrality: {{ "%.4f"|format(inf[1]) }}</p>
+                {% endfor %}
+            {% else %}
+                <p>No eigenvector data</p>
+            {% endif %}
+        </div>
+
+    </div> <!-- END dashboard -->
+</div> <!-- END container -->
 
 <script>
-// DATA FROM FLASK
-const topicData = {{ topic_sentiments | tojson }};
+    // DATA FROM FLASK
+    const topicData = {{ topic_sentiments | tojson }};
 
-// 🔍 SEARCH FUNCTION
-function filterTopics() {
-    const input = document.getElementById("searchBox").value.toLowerCase();
+    // SEARCH FUNCTION
+    function filterTopics() {
+        const input = document.getElementById("searchBox").value.toLowerCase();
+        const grid = document.getElementById("topicGrid");
+        const resultDiv = document.getElementById("searchResult");
 
-    const grid = document.getElementById("topicGrid");
-    const resultDiv = document.getElementById("searchResult");
+        if (input === "") {
+            grid.style.display = "grid";
+            resultDiv.style.display = "none";
+            resultDiv.innerHTML = "";
+            return;
+        }
 
-    if (input === "") {
-        grid.style.display = "grid";
-        resultDiv.style.display = "none";
-        resultDiv.innerHTML = "";
-        return;
-    }
+        let found = false;
+        let html = "";
 
-    let found = false;
-    let html = "";
+        for (let topic in topicData) {
+            if (topic.toLowerCase().includes(input)) {
+                const data = topicData[topic];
 
-    for (let topic in topicData) {
-        if (topic.toLowerCase().includes(input)) {
-            const data = topicData[topic];
+                html += `
+                    <div class="topic-card">
+                        <h3>${topic}</h3>
+                        <p class="positive">Positive: ${data["Positive"]}</p>
+                        <p class="negative">Negative: ${data["Negative"]}</p>
+                        <p class="neutral">Neutral: ${data["Neutral"]}</p>
+                    </div>
+                `;
 
-            html += `
-                <div class="topic-card">
-                    <h3>${topic}</h3>
-                    <p class="positive">Positive: ${data["Positive"]}</p>
-                    <p class="negative">Negative: ${data["Negative"]}</p>
-                    <p class="neutral">Neutral: ${data["Neutral"]}</p>
-                </div>
-            `;
+                found = true;
+            }
+        }
 
-            found = true;
+        if (found) {
+            grid.style.display = "none";
+            resultDiv.style.display = "grid";
+            resultDiv.style.gridTemplateColumns = "repeat(2, 1fr)";
+            resultDiv.style.gap = "15px";
+            resultDiv.innerHTML = html;
+        } else {
+            grid.style.display = "none";
+            resultDiv.style.display = "block";
+            resultDiv.innerHTML = "<p>No topic found</p>";
         }
     }
 
-    if (found) {
-        grid.style.display = "none";
-        resultDiv.style.display = "grid";
-        resultDiv.style.gridTemplateColumns = "repeat(2, 1fr)";
-        resultDiv.style.gap = "15px";
-        resultDiv.innerHTML = html;
-    } else {
-        grid.style.display = "none";
-        resultDiv.style.display = "block";
-        resultDiv.innerHTML = "<p>No topic found</p>";
-    }
-}
+    // CHART INITIALIZATION
+    const labels = Object.keys(topicData);
+    const positive = labels.map(t => topicData[t]["Positive"]);
+    const negative = labels.map(t => topicData[t]["Negative"]);
+    const neutral = labels.map(t => topicData[t]["Neutral"]);
 
-// 📊 CHART (FIXED)
-const labels = Object.keys(topicData);
+    const ctx = document.getElementById("chart").getContext("2d");
 
-const positive = labels.map(t => topicData[t]["Positive"]);
-const negative = labels.map(t => topicData[t]["Negative"]);
-const neutral = labels.map(t => topicData[t]["Neutral"]);
-
-const ctx = document.getElementById("chart").getContext("2d");
-
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: labels,
-        datasets: [
-            {
-                label: 'Positive',
-                data: positive,
-                backgroundColor: '#2ecc71'
-            },
-            {
-                label: 'Negative',
-                data: negative,
-                backgroundColor: '#e74c3c'
-            },
-            {
-                label: 'Neutral',
-                data: neutral,
-                backgroundColor: '#f39c12'
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Positive', data: positive, backgroundColor: '#2ecc71' },
+                { label: 'Negative', data: negative, backgroundColor: '#e74c3c' },
+                { label: 'Neutral', data: neutral, backgroundColor: '#f39c12' }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
             }
-        ]
-    }
-});
+        }
+    });
 </script>
 
 </body>
